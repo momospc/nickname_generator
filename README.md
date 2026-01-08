@@ -7,5 +7,6 @@ Generate random, but good sounding, names for your everyday needs! Simple, yet e
   - press ESC to quit
 
 ## Compile with:
+```bash
 g++ NICKNAME-generator_SDL2.cpp -o nickname-generator `sdl2-config --cflags --libs` -lSDL2_ttf
-
+```
