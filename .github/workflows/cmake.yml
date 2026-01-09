@@ -1,0 +1,48 @@
+name: CMake SDL2 Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # ---------- Linux ----------
+    - name: Install SDL2 (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev
+
+    # ---------- Windows ----------
+    - name: Setup MSVC (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/setup-msbuild@v2
+
+    - name: Install SDL2 via vcpkg (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.bat
+        ./vcpkg/vcpkg install sdl2 sdl2-ttf
+        echo "VCPKG_ROOT=${{ github.workspace }}\vcpkg" >> $env:GITHUB_ENV
+
+    # ---------- Configure ----------
+    - name: Configure CMake
+      run: |
+        cmake -S . -B build ^
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
+      shell: bash
+
+    # ---------- Build ----------
+    - name: Build
+      run: cmake --build build --config Release
+
