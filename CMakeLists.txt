@@ -11,16 +11,18 @@ add_executable(nickname_generator
     NICKNAME-generator_SDL2.cpp
 )
 
-target_include_directories(nickname_generator PRIVATE
-    ${SDL2_INCLUDE_DIRS}
-)
-
 target_link_libraries(nickname_generator PRIVATE
     SDL2::SDL2
+    SDL2::SDL2main
     SDL2_ttf::SDL2_ttf
 )
 
-# Копира шрифта до executable-а (ако съществува)
+if (WIN32)
+    set_target_properties(nickname_generator PROPERTIES
+        WIN32_EXECUTABLE FALSE
+    )
+endif()
+
 if (EXISTS "${CMAKE_SOURCE_DIR}/Roboto-Regular.ttf")
     add_custom_command(TARGET nickname_generator POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
